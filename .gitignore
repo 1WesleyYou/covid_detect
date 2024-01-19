@@ -1,3 +1,6 @@
 # ignore ide folders
 .idea/
 .vscode/
+
+# ignore the datasets
+dataset/
