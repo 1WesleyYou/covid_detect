@@ -1,8 +1,7 @@
 import os
 from enum import Enum
-import torchvision
 import torchvision.transforms as transforms
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, random_split
 
 
 class Class(Enum):
@@ -11,8 +10,6 @@ class Class(Enum):
 
 
 # 数据集路径 (指向 COVID 父文件夹)
-
-
 data_root_path = './dataset'
 
 transform = transforms.Compose([
@@ -42,3 +39,22 @@ class CTScanDataset(Dataset):
         for filename in os.listdir('dataset/non-COVID'):
             data.append({'image_path': os.path.join(f'dataset/COVID/{filename}'), 'label': Class.NON_COVID})
         return data
+
+    def __len__(self):
+        # 获取数据集组数
+        return len(self.data)
+
+
+# 初始化数据集
+dataset = CTScanDataset(transform)
+
+# 划分数据集：我们将 80% 的数据用于训练模型，10% 用于训练时测试评估，10% 用于最终评估
+train_size = int(0.8 * len(dataset))
+val_size = int(0.1 * len(dataset))
+test_size = len(dataset) - train_size - val_size
+train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
+
+# 创建数据加载器
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
