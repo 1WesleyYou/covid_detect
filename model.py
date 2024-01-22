@@ -2,9 +2,8 @@ import torch.nn as nn
 
 
 class UnetModel(nn.Module):
-    def __int__(self):
+    def __init__(self):
         super(UnetModel, self).__init__()
-
         # 定义编码器（下采样部分，U的左半边）
         self.encoder = nn.Sequential(
             # CT 是灰度图, 输入维度是 1

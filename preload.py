@@ -1,7 +1,10 @@
 import os
 from enum import Enum
+import torch
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset, random_split
+from torchvision.io import read_image
+from PIL import Image
 
 
 class Class(Enum):
@@ -35,14 +38,26 @@ class CTScanDataset(Dataset):
             # left = 6  # the position for the left part
             # right = filename.find(')')
             # index = filename[left + 1:right]
-            data.append({'image_path': os.path.join(f'dataset/COVID/{filename}'), 'label': Class.COVID})
+            data.append({'image_path': os.path.join(f'dataset/COVID/{filename}'), 'label': 1})
         for filename in os.listdir('dataset/non-COVID'):
-            data.append({'image_path': os.path.join(f'dataset/COVID/{filename}'), 'label': Class.NON_COVID})
+            data.append({'image_path': os.path.join(f'dataset/non-COVID/{filename}'), 'label': 0})
         return data
 
     def __len__(self):
         # 获取数据集组数
         return len(self.data)
+
+    # 重新定义 getitem, 这是 Dataset 的一个类方法，能从数据集中获得单个样本
+    # 思路是通过访问路径获得图像张量和标签，这样就不需要一次性加载所有数据集了
+    def __getitem__(self, idx):
+        img_path = self.data[idx]['image_path']
+        label = torch.tensor([self.data[idx]['label']], dtype=torch.long)
+        image = Image.open(img_path).convert("L")  # 使用torchvision读取图像
+
+        if self.transform:
+            image = self.transform(image)
+
+        return {'image_path': image, 'label': label}
 
 
 # 初始化数据集
