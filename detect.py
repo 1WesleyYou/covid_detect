@@ -24,6 +24,6 @@ for epochs in range(num_epoch):
         loss.backward()
         optimizer.step()
 
-        print(f'training case {idx+1}')
+        print(f'training case {idx + 1}')
 
-    print(f'epoch {epochs}, loss:{loss.item()}')
+    print(f'epoch {epochs + 1}, loss:{loss.item()}')
