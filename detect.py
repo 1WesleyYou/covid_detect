@@ -1,5 +1,7 @@
+import torch
+
 from model import UnetModel
-from preload import train_loader
+from preload import train_loader, test_loader
 import torch.optim as optim
 import torch.nn as nn
 
@@ -9,7 +11,9 @@ criterion = nn.BCELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # 训练
+
 num_epoch = 10  # 训练次数
+
 for epochs in range(num_epoch):
     model.train()
     # 读取数据集
@@ -24,6 +28,25 @@ for epochs in range(num_epoch):
         loss.backward()
         optimizer.step()
 
-        print(f'training case {idx + 1}')
+        # print(f'training case {idx + 1}')
 
     print(f'epoch {epochs + 1}, loss:{loss.item()}')
+
+# 检验训练效果
+total = 0
+correct = 0
+
+model.eval()
+with torch.no_grad():
+    for data, label in test_loader:
+        output = model(data)
+        _, predicted = torch.max(output, 1)  # 返回 (最大张量, 索引)； 1 表示维度； 整体表示最有可能的一个，这个适用于多元分类
+        total += label.size(0)  # 总的 case 数量
+        true_case = 0
+        for _ in label:
+            if predicted == label:
+                true_case += 1
+        correct += true_case
+
+accuracy = correct / total
+print(f"the accuracy for the model is {accuracy * 100:.2f}%")  # 输出正确率
