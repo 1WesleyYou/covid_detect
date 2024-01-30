@@ -14,6 +14,14 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 process_bar = tqdm(total=100, ncols=110, desc=f"Training process")
 num_epoch = 10  # 训练次数
 
+# 检查当前设备是否为 GPU
+if torch.cuda.is_available():
+    current_device = torch.cuda.current_device()
+    device_name = torch.cuda.get_device_name(current_device)
+    print(f"Code is running on GPU: {device_name}")
+else:
+    print("Code is running on CPU.")
+
 for epochs in range(num_epoch):
     model.train()
     # 读取数据集
