@@ -1,5 +1,5 @@
 import torch
-
+from tqdm import tqdm
 from model import UnetModel
 from preload import train_loader, test_loader
 import torch.optim as optim
@@ -11,13 +11,16 @@ criterion = nn.BCELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # 训练
-
+process_bar = tqdm(total=100, ncols=110, desc=f"Training process")
 num_epoch = 10  # 训练次数
 
 for epochs in range(num_epoch):
     model.train()
     # 读取数据集
     for idx, batch in enumerate(train_loader):
+        tqdm_grow_scale = 100 / num_epoch / len(train_loader)
+        process_bar.update(round(tqdm_grow_scale, 2))
+
         input_image = batch['image_path']  # 尺寸是四维张量 [batch_size, channel, width, height]
         label = batch['label']  # 展平为 1 维, 这里应该输出一个批次 (batch) 的事实标签
         label = label.float()
@@ -50,3 +53,5 @@ with torch.no_grad():
 
 accuracy = correct / total
 print(f"the accuracy for the model is {accuracy * 100:.2f}%")  # 输出正确率
+
+trained_model = {"model": model, "accuracy": accuracy}
