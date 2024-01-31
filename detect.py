@@ -6,13 +6,14 @@ import torch.optim as optim
 import torch.nn as nn
 
 # 模型定义
-model = UnetModel()
+model = UnetModel().cuda()
 criterion = nn.BCELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # 训练
 process_bar = tqdm(total=100, ncols=110, desc=f"Training process", position=0)
 num_epoch = 10  # 训练次数
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # 检查当前设备是否为 GPU
 if torch.cuda.is_available():
@@ -21,6 +22,8 @@ if torch.cuda.is_available():
     print(f"Code is running on GPU: {device_name}")
 else:
     print("Code is running on CPU.")
+
+
 
 for epochs in range(num_epoch):
     model.train()
@@ -31,8 +34,11 @@ for epochs in range(num_epoch):
         process_bar.update(round(tqdm_grow_scale, 2))
 
         input_image = batch['image_path']  # 尺寸是四维张量 [batch_size, channel, width, height]
+        input_image = input_image.to(device)
         label = batch['label']  # 展平为 1 维, 这里应该输出一个批次 (batch) 的事实标签
+        # label = label.view(-1, 1, 1, 1)
         label = label.float()
+        label = label.to(device)
 
         optimizer.zero_grad()
         output = model(input_image)
@@ -66,4 +72,4 @@ correct = 0
 
 # trained_model = {"model": model, "accuracy": accuracy}
 
-torch.save(model.state_dict(),"build/model.pth")
+torch.save(model.state_dict(), "build/model.pth")
