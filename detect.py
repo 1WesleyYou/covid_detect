@@ -11,7 +11,7 @@ criterion = nn.BCELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # 训练
-process_bar = tqdm(total=100, ncols=110, desc=f"Training process")
+process_bar = tqdm(total=100, ncols=110, desc=f"Training process", position=0)
 num_epoch = 10  # 训练次数
 
 # 检查当前设备是否为 GPU
@@ -24,6 +24,7 @@ else:
 
 for epochs in range(num_epoch):
     model.train()
+    loss = []
     # 读取数据集
     for idx, batch in enumerate(train_loader):
         tqdm_grow_scale = 100 / num_epoch / len(train_loader)
@@ -47,19 +48,22 @@ for epochs in range(num_epoch):
 total = 0
 correct = 0
 
-model.eval()
-with torch.no_grad():
-    for data, label in test_loader:
-        output = model(data)
-        _, predicted = torch.max(output, 1)  # 返回 (最大张量, 索引)； 1 表示维度； 整体表示最有可能的一个，这个适用于多元分类
-        total += label.size(0)  # 总的 case 数量
-        true_case = 0
-        for _ in label:
-            if predicted == label:
-                true_case += 1
-        correct += true_case
+# model.eval()
+# with torch.no_grad():
+#     for data, label in test_loader:
+#         output = model(data)
+#         _, predicted = torch.max(output, 1)  # 返回 (最大张量, 索引)； 1 表示维度； 整体表示最有可能的一个，这个适用于多元分类
+#         total += label.size(0)  # 总的 case 数量
+#         true_case = 0
+#         for _ in label:
+#             if predicted == label:
+#                 true_case += 1
+#         correct += true_case
+# todo: 把这个检测搞定
 
-accuracy = correct / total
-print(f"the accuracy for the model is {accuracy * 100:.2f}%")  # 输出正确率
+# accuracy = correct / total
+# print(f"the accuracy for the model is {accuracy * 100:.2f}%")  # 输出正确率
 
-trained_model = {"model": model, "accuracy": accuracy}
+# trained_model = {"model": model, "accuracy": accuracy}
+
+torch.save(model.state_dict(),"build/model.pth")
